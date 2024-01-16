@@ -293,10 +293,135 @@ async function insertValuation(data) {
 }
 
 
+async function createTables() {
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+
+    // Create ipos table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS ipos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        link VARCHAR(255)
+      );
+    `);
+
+    // Create details table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS details (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ipoid INT,
+        details TEXT,
+        object_of_issue JSON,
+        review JSON,
+        firm_review JSON,
+        peer_group JSON,
+        company_promoters JSON,
+        lead_manager JSON,
+        FOREIGN KEY (ipoid) REFERENCES ipos(id)
+      );
+    `);
+
+    // Create faq table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS faq (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ipoid INT,
+        question TEXT,
+        answer TEXT,
+        FOREIGN KEY (ipoid) REFERENCES ipos(id)
+      );
+    `);
+
+    // Create price_band table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS price_band (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ipoid INT,
+        ipo_open VARCHAR(255),
+        ipo_close VARCHAR(255),
+        ipo_size VARCHAR(255),
+        offer_for_sale VARCHAR(255),
+        face_value VARCHAR(255),
+        ipo_price_band VARCHAR(255),
+        ipo_listing_on VARCHAR(255),
+        retail_quota VARCHAR(255),
+        qib_quota VARCHAR(255),
+        nii_quota VARCHAR(255),
+        drhp_link VARCHAR(255),
+        rhp_link VARCHAR(255),
+        anchor_investors_list VARCHAR(255),
+        FOREIGN KEY (ipoid) REFERENCES ipos(id)
+      );
+    `);
+
+    // Create market_lot table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS market_lot (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ipoid INT,
+        application VARCHAR(255),
+        lot_size VARCHAR(255),
+        shares VARCHAR(255),
+        amount VARCHAR(255),
+        FOREIGN KEY (ipoid) REFERENCES ipos(id)
+      );
+    `);
+
+    // Create timeline table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS timeline (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ipoid INT,
+        anchor_investors_allotment VARCHAR(255),
+        ipo_open_date VARCHAR(255),
+        ipo_close_date VARCHAR(255),
+        basis_of_allotment VARCHAR(255),
+        refunds VARCHAR(255),
+        credit_to_demat_account VARCHAR(255),
+        ipo_listing_date VARCHAR(255),
+        FOREIGN KEY (ipoid) REFERENCES ipos(id)
+      );
+    `);
+
+    // Create financial_data table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS financial_data (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ipoid INT,
+        year VARCHAR(255),
+        revenue VARCHAR(255),
+        expense VARCHAR(255),
+        pat VARCHAR(255),
+        FOREIGN KEY (ipoid) REFERENCES ipos(id)
+      );
+    `);
+
+    // Create valuation table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS valuation (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ipoid INT,
+        eps VARCHAR(255),
+        pe_ratio VARCHAR(255),
+        ronw VARCHAR(255),
+        nav VARCHAR(255),
+        FOREIGN KEY (ipoid) REFERENCES ipos(id)
+      );
+    `);
+
+    console.log('Tables created successfully.');
+
+    await connection.end();
+  } catch (error) {
+    console.error(`Error creating tables: ${error.message}`);
+  }
+}
+
 
 async function main() {
   try {
     const results = await fetchUrlsFromDatabase();
+    await createTables();
 
     for (const ipo of results) {
       

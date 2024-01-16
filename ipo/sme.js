@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const mysql = require('mysql2/promise');
 
 async function scrapeIPOData() {
   try {
@@ -41,6 +42,46 @@ async function scrapeIPOData() {
 
     // Output the extracted table data
     console.log(tableData.slice(1));
+
+    const connection = await mysql.createConnection({
+      host: 'localhost',
+      user: 'root',
+      password: '',
+      database: 'ipo',
+    });
+
+    // Check if the table exists
+      // Table does not exist, create it
+      const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS sme (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(255),
+          Dates VARCHAR(255),
+          Price VARCHAR(255),
+          Platform VARCHAR(255),
+          link VARCHAR(255)
+        );
+      `;
+      await connection.execute(createTableQuery);
+      console.log('Table sme created.');
+
+    // Define the SQL query to insert data into the table
+    const insertDataQuery = `
+      INSERT INTO sme (name, Dates, Price, Platform, link)
+      VALUES (?, ?, ?, ?, ?);
+    `;
+
+    // Loop through the scraped data and insert into the table
+    for (const rowData of tableData.slice(1)) {
+      const { Column_1, Column_2, Column_3, Column_4, link } = rowData;
+      await connection.execute(insertDataQuery, [Column_1, Column_2, Column_3, Column_4, link]);
+    }
+
+    console.log('Data inserted into the table successfully.');
+
+    // Close the database connection
+    await connection.end();
+
   } catch (error) {
     console.error('Error:', error.message);
   }

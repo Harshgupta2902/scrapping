@@ -20,11 +20,16 @@ axios.get(url)
         // Handle case where IPO Open information is split across two lines
         if (index === 0) {
           const lines = text.split('\n');
+          const strongText = $(element).find('strong').text().trim();
+          rowData.push(strongText);
           if (lines.length > 1) {
             rowData.push(lines[0].trim(), lines[1].trim()); // Extracting both lines
           } else {
-            rowData.push(text);
+            rowData.push(text.replace(strongText, '').trim()); // Remove "Closed" from the text
           }
+
+          // Extract the word inside the strong tag
+         
         } else {
           rowData.push(text);
         }
@@ -32,6 +37,7 @@ axios.get(url)
 
       console.log(rowData);
     });
+
   })
   .catch(error => { 
     console.error(`Error fetching data from ${url}: ${error.message}`);

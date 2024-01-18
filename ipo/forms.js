@@ -29,7 +29,7 @@ connection.connect((err) => {
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(255),
       name_link VARCHAR(255),
-      date DATE,
+      date VARCHAR(255),
       date_link VARCHAR(255),
       bse VARCHAR(255),
       bse_link VARCHAR(255),

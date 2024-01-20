@@ -22,12 +22,12 @@ function createTable() {
     connection.query(`
       CREATE TABLE IF NOT EXISTS ipos (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        companyName VARCHAR(255) NOT NULL,
-        date VARCHAR(50) NOT NULL,
-        size VARCHAR(50) NOT NULL,
-        price VARCHAR(50) NOT NULL,
-        status ENUM('Upcoming', 'Forthcoming', 'Closed') NOT NULL,
-        link VARCHAR(255) NOT NULL
+        companyName VARCHAR(255) NULL,
+        date VARCHAR(50) NULL,
+        size VARCHAR(50) NULL,
+        price VARCHAR(50) NULL,
+        status ENUM('Upcoming', 'Forthcoming', 'Closed') NULL,
+        link VARCHAR(255) NULL
       )
     `, (error, results) => {
       if (error) {
@@ -58,7 +58,7 @@ function fetchAndInsertData() {
         }
 
         const columns = $(row).find("td");
-        const companyName = columns.eq(0).find('a').text().trim();
+        const companyName = columns.eq(0).text().trim();
         const link = columns.eq(0).find('a').attr('href');
         const date = columns.eq(1).text().trim();
         const size = columns.eq(2).text().trim();

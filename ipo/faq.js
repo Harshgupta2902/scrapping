@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 // Create a MySQL connection
 const connection = mysql.createConnection({
@@ -9,6 +9,21 @@ const connection = mysql.createConnection({
 });
 // Connect to the database
 connection.connect();
+
+connection.query(`
+  CREATE TABLE IF NOT EXISTS faq (
+    ipoid INT AUTO_INCREMENT PRIMARY KEY,
+    question VARCHAR(255),
+    answer TEXT,
+    type VARCHAR(255)
+  );
+`, (error, results, fields) => {
+  if (error) {
+    throw error;
+  }
+
+  console.log('Table created or already exists');
+});
 
 const jsonData = {
   "GMP": [
@@ -187,10 +202,11 @@ for (const key in jsonData) {
 
     // Insert into the database
     const query = `INSERT INTO faq (ipoid, question, answer, type) VALUES (?, ?, ?, ?)`;
-    connection.query(query, [ipoid, question, answer, typeValue], (error, results, fields) => {
+    connection.execute(query, [ipoid, question, answer, typeValue], (error, results, fields) => {
       if (error) throw error;
       console.log(`Inserted into database: ${key}`);
     });
+    
   }
 }
 

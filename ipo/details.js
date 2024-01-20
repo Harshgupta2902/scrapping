@@ -328,6 +328,7 @@ async function createTables() {
         ipoid INT,
         question TEXT,
         answer TEXT,
+        type VARCHAR(255),
         FOREIGN KEY (ipoid) REFERENCES ipos(id)
       );
     `);

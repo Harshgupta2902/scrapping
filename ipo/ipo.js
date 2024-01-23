@@ -71,7 +71,7 @@ function fetchAndInsertData() {
         const ipoEntry = [companyName, date, size, price, status, cleanLink];
         ipos.push(ipoEntry);
       });
-
+console.log(ipos);
       insertData(ipos);
     })
     .catch((error) => {

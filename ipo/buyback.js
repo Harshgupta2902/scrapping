@@ -29,6 +29,8 @@ async function createTableAndInsertData(rows) {
       );
     `);
 
+    await connection.query('TRUNCATE TABLE buyback;');
+
     for (const row of rows) {
       const [company, recordDate, open, close, price] = row;
 

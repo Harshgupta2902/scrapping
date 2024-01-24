@@ -38,6 +38,7 @@ async function fetchData() {
 
     // Create 'recents' table
     await createTable(connection, 'recents');
+    await truncateTable(connection, 'recents');
 
     // Insert data into 'recents' table
     await insertDataIntoTable(connection, 'recents', table1Data);
@@ -55,6 +56,12 @@ async function fetchData() {
     // End the server gracefully
     process.exit();
   }
+}
+
+
+async function truncateTable(connection, tableName) {
+  const query = `TRUNCATE TABLE ${tableName}`;
+  return executeQuery(connection, query);
 }
 
 function extractTableData($, table, type) {

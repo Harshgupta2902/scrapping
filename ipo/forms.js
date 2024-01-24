@@ -37,7 +37,7 @@ connection.connect((err) => {
       nse_link VARCHAR(255)
     )
   `;
-  
+
   connection.query(createTableQuery, (err) => {
     if (err) {
       console.error('Error creating table:', err.message);
@@ -50,48 +50,63 @@ connection.connect((err) => {
 });
 
 function fetchDataAndInsertData() {
-  axios.get(url)
-    .then(response => {
-      if (response.status === 200) {
-        const html = response.data;
-        const $ = cheerio.load(html);
-        const table = $('table');
-        const tableData = [];
 
-        table.find('tr').each((rowIndex, row) => {
-          if (rowIndex === 0) {
-            return;
-          }
-          const rowData = [];
-          $(row).find('td').each((colIndex, column) => {
-            const cellText = $(column).text().trim();
-            rowData.push(cellText);
-            const anchorLink = $(column).find('a').attr('href');
-            const finalCellText = anchorLink ? anchorLink : null;
-            rowData.push(finalCellText);
-          });
-          tableData.push(rowData);
-        });
-
-        // Insert data into the 'forms' table
-        tableData.forEach(rowData => {
-          const sql = 'INSERT INTO forms (name, name_link, date, date_link, bse, bse_link, nse, nse_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-          connection.query(sql, rowData, (err, result) => {
-            if (err) {
-              console.error('Error inserting into database:', err.message);
-            } else {
-              console.log('Row inserted into database:');
-            }
-          });
-        });
-
-        // Close the database connection
-        connection.end();
-      }
-    })
-    .catch(error => {
-      console.error(`Error fetching data: ${error.message}`);
+  const truncateTableQuery = 'TRUNCATE TABLE forms';
+  connection.query(truncateTableQuery, (err) => {
+    if (err) {
+      console.error('Error truncating table:', err.message);
       // Close the database connection in case of an error
       connection.end();
-    });
+    } else {
+      console.log('Table truncated');
+      axios.get(url)
+        .then(response => {
+          if (response.status === 200) {
+            const html = response.data;
+            const $ = cheerio.load(html);
+            const table = $('table');
+            const tableData = [];
+
+            table.find('tr').each((rowIndex, row) => {
+              if (rowIndex === 0) {
+                return;
+              }
+              const rowData = [];
+              $(row).find('td').each((colIndex, column) => {
+                const cellText = $(column).text().trim();
+                rowData.push(cellText);
+                const anchorLink = $(column).find('a').attr('href');
+                const finalCellText = anchorLink ? anchorLink : null;
+                rowData.push(finalCellText);
+              });
+              tableData.push(rowData);
+            });
+
+            // Insert data into the 'forms' table
+            tableData.forEach(rowData => {
+              const sql = 'INSERT INTO forms (name, name_link, date, date_link, bse, bse_link, nse, nse_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+              connection.query(sql, rowData, (err, result) => {
+                if (err) {
+                  console.error('Error inserting into database:', err.message);
+                } else {
+                  console.log('Row inserted into database:');
+                }
+              });
+            });
+
+            // Close the database connection
+            connection.end();
+          }
+        })
+        .catch(error => {
+          console.error(`Error fetching data: ${error.message}`);
+          connection.end();
+        });
+    }
+
+
+  });
+
+
+
 }

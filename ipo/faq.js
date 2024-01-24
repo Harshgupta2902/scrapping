@@ -12,10 +12,11 @@ connection.connect();
 
 connection.query(`
   CREATE TABLE IF NOT EXISTS faq (
-    ipoid INT AUTO_INCREMENT PRIMARY KEY,
-    question VARCHAR(255),
-    answer TEXT,
-    type VARCHAR(255)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ipoid INT NULL,
+    question VARCHAR(255) NULL,
+    answer TEXT NULL,
+    type VARCHAR(255) NULL
   );
 `, (error, results, fields) => {
   if (error) {
@@ -23,6 +24,13 @@ connection.query(`
   }
 
   console.log('Table created or already exists');
+});
+
+connection.query('TRUNCATE TABLE faq', (error, results, fields) => {
+  if (error) {
+    throw error;
+  }
+  console.log('Table truncated');
 });
 
 const jsonData = {
@@ -249,17 +257,15 @@ const jsonData = {
   
 }
 
-// Iterate through JSON data and insert into the database
 for (const key in jsonData) {
   const entries = jsonData[key];
 
   for (const entry of entries) {
-    const ipoid = null; // You may replace this with the actual ipoid value if available
+    const ipoid = null;
     const question = entry.question || '';
     const answer = entry.answer || '';
     const typeValue = key;
 
-    // Insert into the database
     const query = `INSERT INTO faq (ipoid, question, answer, type) VALUES (?, ?, ?, ?)`;
     connection.execute(query, [ipoid, question, answer, typeValue], (error, results, fields) => {
       if (error) throw error;

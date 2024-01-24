@@ -9,17 +9,12 @@ const insertDataIntoDatabase = async (url, tableName) => {
       const html = response.data;
       const $ = cheerio.load(html);
 
-      // Find the div with id "report_data" and extract table data
       const tableData = $('#report_data table').map(function () {
         const headers = [];
         const rows = [];
-
-        // Extract column headers
         $(this).find('thead th').each(function () {
           headers.push($(this).text().trim());
         });
-
-        // Extract rows data
         $(this).find('tbody tr').each(function () {
           const row = {};
           $(this).find('td').each(function (index) {
@@ -27,14 +22,9 @@ const insertDataIntoDatabase = async (url, tableName) => {
           });
           rows.push(row);
         });
-
         return rows;
       }).get();
-
-      // Now you have the table data in the "tableData" variable
       console.log(tableData);
-
-      // Create a MySQL connection pool
       const pool = mysql.createPool({
         host: 'localhost',
         user: 'root',
@@ -44,8 +34,6 @@ const insertDataIntoDatabase = async (url, tableName) => {
         connectionLimit: 10,
         queueLimit: 0
       });
-
-      // Function to create table
       const createDataTable = async () => {
         const connection = await pool.getConnection();
         try {
@@ -66,12 +54,12 @@ const insertDataIntoDatabase = async (url, tableName) => {
               applications VARCHAR(255)
             );
           `);
+      await connection.query(`TRUNCATE TABLE ${tableName};`);
+
         } finally {
           connection.release();
         }
       };
-
-      // Function to insert data into table
       const insertData = async () => {
         const connection = await pool.getConnection();
         try {
@@ -100,14 +88,12 @@ const insertDataIntoDatabase = async (url, tableName) => {
       };
 
       try {
-        // Execute the database setup and data insertion
         await createDataTable();
         await insertData();
         console.log(`Data from ${url} inserted successfully.`);
       } catch (error) {
         console.error(`Error during database operations for ${url}:`, error.message);
       } finally {
-        // Close the database connection pool
         await pool.end();
       }
     }
@@ -115,13 +101,11 @@ const insertDataIntoDatabase = async (url, tableName) => {
     console.error(`Error fetching data from ${url}: ${error.message}`);
   }
 };
-
-// Use the function for the first URL
 const firstUrl = 'https://www.chittorgarh.com/report/ipo-subscription-status-live-bidding-data-bse-nse/21/?year=2024';
 const firstTableName = 'ipo_subscription_data';
 insertDataIntoDatabase(firstUrl, firstTableName);
 
-// Use the function for the second URL
+
 const secondUrl = 'https://www.chittorgarh.com/report/sme-ipo-subscription-status-live-bidding-bse-nse/22/';
 const secondTableName = 'sme_subscription_data';
 insertDataIntoDatabase(secondUrl, secondTableName);

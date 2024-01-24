@@ -60,6 +60,8 @@ axios.get(url)
               kostak VARCHAR(255)
             );
           `);
+          await connection.query('TRUNCATE TABLE gmp;');
+
         } finally {
           connection.release();
         }
@@ -78,6 +80,8 @@ axios.get(url)
               listed VARCHAR(255)
             );
           `);
+          await connection.query('TRUNCATE TABLE old_gmp;');
+
         } finally {
           connection.release();
         }
@@ -117,6 +121,8 @@ axios.get(url)
       await insertGmpData();
       await insertOldGmpData();
       console.log('Data inserted successfully.');
+      pool.end();
+
     }
   })
   .catch((error) => {
